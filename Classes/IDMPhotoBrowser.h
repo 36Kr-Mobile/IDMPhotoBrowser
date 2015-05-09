@@ -12,6 +12,7 @@
 #import "IDMPhoto.h"
 #import "IDMPhotoProtocol.h"
 #import "IDMCaptionView.h"
+#import "IDMPageControl.h"
 
 // Delgate
 @class IDMPhotoBrowser;
@@ -22,7 +23,16 @@
 - (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser willDismissAtPageIndex:(NSUInteger)index;
 - (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser didDismissActionSheetWithButtonIndex:(NSUInteger)buttonIndex photoIndex:(NSUInteger)photoIndex;
 - (IDMCaptionView *)photoBrowser:(IDMPhotoBrowser *)photoBrowser captionViewForPhotoAtIndex:(NSUInteger)index;
+
 @end
+
+// KR Custom
+
+typedef NS_ENUM(NSUInteger, IDMPhotoBrowserInfoViewType) {
+    IDMPhotoBrowserInfoViewTypePageControl, // 分页小白点
+    IDMPhotoBrowserInfoViewTypeCaptionView, // 显示图片信息的view
+    IDMPhotoBrowserInfoViewTypeTogglePageControlAndCaptionView, // 在 pageControl 和 captionView 之间切换
+};
 
 // IDMPhotoBrowser
 @interface IDMPhotoBrowser : UIViewController <UIScrollViewDelegate, UIActionSheetDelegate> 
@@ -58,6 +68,8 @@
 
 // animation time (default .28)
 @property (nonatomic) float animationDuration;
+
+@property (nonatomic) IDMPhotoBrowserInfoViewType kr_infoViewType;
 
 // Init
 - (id)initWithPhotos:(NSArray *)photosArray;

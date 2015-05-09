@@ -17,6 +17,8 @@
 NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"IDMPBLocalizations" ofType:@"bundle"]], nil)
 #endif
 
+static const CGFloat kPageControlBottomPadding = 15.0;
+
 // Private
 @interface IDMPhotoBrowser () {
 	// Data
@@ -73,6 +75,9 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 	// iOS 7
     UIViewController *_applicationTopViewController;
     int _previousModalPresentationStyle;
+
+    // KR Custom
+    IDMPageControl *_kr_pageControl;
 }
 
 // Private Properties
@@ -167,7 +172,7 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
         _displayCounterLabel = NO;
         
         _forceHideStatusBar = NO;
-        _usePopAnimation = NO;
+        _usePopAnimation = YES;
 		_disableVerticalSwipe = NO;
 		
         _useWhiteBackgroundColor = NO;
@@ -181,7 +186,9 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
         _scaleImage = nil;
         
         _isdraggingPhoto = NO;
-        
+
+        _kr_infoViewType = IDMPhotoBrowserInfoViewTypePageControl;
+
         if ([self respondsToSelector:@selector(automaticallyAdjustsScrollViewInsets)])
             self.automaticallyAdjustsScrollViewInsets = NO;
         
@@ -295,7 +302,7 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
     [scrollView setCenter:translatedPoint];
     
     float newY = scrollView.center.y - viewHalfHeight;
-    float newAlpha = 1 - abs(newY)/viewHeight; //abs(newY)/viewHeight * 1.8;
+    float newAlpha = 1 - fabsf(newY)/viewHeight; //abs(newY)/viewHeight * 1.8;
     
     self.view.opaque = YES;
     
@@ -428,7 +435,7 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 }
 
 - (void)performCloseAnimationWithScrollView:(IDMZoomingScrollView*)scrollView {
-    float fadeAlpha = 1 - abs(scrollView.frame.origin.y)/scrollView.frame.size.height;
+    float fadeAlpha = 1 - fabs(scrollView.frame.origin.y)/scrollView.frame.size.height;
     
     UIImage *imageFromView = [scrollView.photo underlyingImage];
     //imageFromView = [self rotateImageToCurrentOrientation:imageFromView];
@@ -525,7 +532,7 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 }
 
 - (UIImage*)getImageFromView:(UIView *)view {
-    UIGraphicsBeginImageContextWithOptions(view.bounds.size, YES, 2);
+    UIGraphicsBeginImageContextWithOptions(view.bounds.size, YES, [[UIScreen mainScreen] scale]);
     [view.layer renderInContext:UIGraphicsGetCurrentContext()];
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
@@ -765,11 +772,35 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
     // Setup
     _performingLayout = YES;
     NSUInteger numberOfPhotos = [self numberOfPhotos];
-    
+
 	// Setup pages
     [_visiblePages removeAllObjects];
     [_recycledPages removeAllObjects];
-    
+
+    switch (_kr_infoViewType) {
+        case IDMPhotoBrowserInfoViewTypePageControl:
+        {
+            _displayToolbar = NO;
+            _displayDoneButton = NO;
+            break;
+        }
+        case IDMPhotoBrowserInfoViewTypeCaptionView:
+        {
+            _displayToolbar = YES;
+            _displayDoneButton = YES;
+            break;
+        }
+        case IDMPhotoBrowserInfoViewTypeTogglePageControlAndCaptionView:
+        {
+            _displayToolbar = YES;
+            _displayDoneButton = YES;
+            break;
+        }
+        default:
+            break;
+    }
+
+
     // Toolbar
     if (_displayToolbar) {
         [self.view addSubview:_toolbar];
@@ -819,6 +850,24 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 	
 	if(! _disableVerticalSwipe)
 		[self.view addGestureRecognizer:_panGesture];
+
+    if (_kr_infoViewType == IDMPhotoBrowserInfoViewTypePageControl ||
+        _kr_infoViewType == IDMPhotoBrowserInfoViewTypeTogglePageControlAndCaptionView) {
+        _kr_pageControl = [[IDMPageControl alloc] init];
+        _kr_pageControl.numberOfPages = numberOfPhotos;
+        [_kr_pageControl setNeedsLayout];
+        [_kr_pageControl layoutIfNeeded];
+
+        CGRect pageControlFrame = _kr_pageControl.frame;
+        pageControlFrame.origin.x = (CGRectGetWidth(self.view.frame) - CGRectGetWidth(pageControlFrame)) / 2.0;
+        pageControlFrame.origin.y = CGRectGetHeight(self.view.frame) - CGRectGetHeight(pageControlFrame) - kPageControlBottomPadding;
+        _kr_pageControl.frame = pageControlFrame;
+
+        [self.view addSubview:_kr_pageControl];
+        if (_kr_infoViewType == IDMPhotoBrowserInfoViewTypeTogglePageControlAndCaptionView) {
+            _kr_pageControl.alpha = 0;
+        }
+    }
 }
 
 #pragma mark - Data
@@ -955,12 +1004,15 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 			[_visiblePages addObject:page];
 			[_pagingScrollView addSubview:page];
 			IDMLog(@"Added page at index %i", index);
-            
-            // Add caption
-            IDMCaptionView *captionView = [self captionViewForPhotoAtIndex:index];
-            captionView.frame = [self frameForCaptionView:captionView atIndex:index];
-            [_pagingScrollView addSubview:captionView];
-            page.captionView = captionView;
+
+            if (_kr_infoViewType == IDMPhotoBrowserInfoViewTypeCaptionView ||
+                _kr_infoViewType == IDMPhotoBrowserInfoViewTypeTogglePageControlAndCaptionView) {
+                // Add caption
+                IDMCaptionView *captionView = [self captionViewForPhotoAtIndex:index];
+                captionView.frame = [self frameForCaptionView:captionView atIndex:index];
+                [_pagingScrollView addSubview:captionView];
+                page.captionView = captionView;
+            }
 		}
 	}
 }
@@ -1120,7 +1172,27 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
 	// Update toolbar when page changes
-	if(! _arrowButtonsChangePhotosAnimated) [self updateToolbar];
+
+    switch (_kr_infoViewType) {
+        case IDMPhotoBrowserInfoViewTypeCaptionView:
+        {
+            if(! _arrowButtonsChangePhotosAnimated) [self updateToolbar];
+            break;
+        }
+        case IDMPhotoBrowserInfoViewTypePageControl:
+        {
+            _kr_pageControl.currentPage = _currentPageIndex;
+            break;
+        }
+        case IDMPhotoBrowserInfoViewTypeTogglePageControlAndCaptionView:
+        {
+            _kr_pageControl.currentPage = _currentPageIndex;
+            if(! _arrowButtonsChangePhotosAnimated) [self updateToolbar];
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 #pragma mark - Toolbar
@@ -1173,7 +1245,13 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
     for (IDMZoomingScrollView *page in _visiblePages) {
         if (page.captionView) [captionViews addObject:page.captionView];
     }
-    
+
+    void(^pageControlAnimation)(CGFloat) = ^ (CGFloat alpha) {
+        if (_kr_infoViewType != IDMPhotoBrowserInfoViewTypePageControl) {
+            _kr_pageControl.alpha = 1-alpha;
+        }
+    };
+
     // Hide/show bars
     [UIView animateWithDuration:(animated ? 0.1 : 0) animations:^(void) {
         CGFloat alpha = hidden ? 0 : 1;
@@ -1181,6 +1259,8 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
         [_toolbar setAlpha:alpha];
         [_doneButton setAlpha:alpha];
         for (UIView *v in captionViews) v.alpha = alpha;
+
+        pageControlAnimation(alpha);
     } completion:^(BOOL finished) {}];
     
 	// Control hiding timer
@@ -1317,6 +1397,19 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 			completion();
 		}];
 	}
+}
+
+#pragma mark - KR Custom
+
+- (void)kr_singleTapHandler
+{
+    if (_kr_infoViewType == IDMPhotoBrowserInfoViewTypePageControl) {
+        [self doneButtonPressed:nil];
+
+    }
+    else {
+        [self toggleControls];
+    }
 }
 
 @end

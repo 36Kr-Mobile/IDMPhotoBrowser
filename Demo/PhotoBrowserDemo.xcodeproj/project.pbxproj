@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		219ABF971AFDB50700C93F34 /* IDMPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 219ABF961AFDB50700C93F34 /* IDMPageControl.m */; };
 		4C6F979214AF734900F8389A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6F979114AF734900F8389A /* UIKit.framework */; };
 		4C6F979414AF734900F8389A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6F979314AF734900F8389A /* Foundation.framework */; };
 		4C6F979614AF734900F8389A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6F979514AF734900F8389A /* CoreGraphics.framework */; };
@@ -56,6 +57,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		219ABF951AFDB50700C93F34 /* IDMPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDMPageControl.h; sourceTree = "<group>"; };
+		219ABF961AFDB50700C93F34 /* IDMPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IDMPageControl.m; sourceTree = "<group>"; };
 		48F398EC6BD549F7A2FDC451 /* libPods-PhotoBrowserDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PhotoBrowserDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C6F978D14AF734900F8389A /* PhotoBrowserDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoBrowserDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C6F979114AF734900F8389A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -254,6 +257,8 @@
 		D1574931178DB94900B0211A /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				219ABF951AFDB50700C93F34 /* IDMPageControl.h */,
+				219ABF961AFDB50700C93F34 /* IDMPageControl.m */,
 				D157494E178DB94900B0211A /* IDMCaptionView.h */,
 				D157494F178DB94900B0211A /* IDMCaptionView.m */,
 				D11464B61802FFC4005B7BC3 /* IDMPBConstants.h */,
@@ -416,6 +421,7 @@
 			files = (
 				4C6F979E14AF734900F8389A /* main.m in Sources */,
 				4C6F97A214AF734900F8389A /* AppDelegate.m in Sources */,
+				219ABF971AFDB50700C93F34 /* IDMPageControl.m in Sources */,
 				4C6F97B314AF737E00F8389A /* Menu.m in Sources */,
 				D1574968178DB94900B0211A /* IDMCaptionView.m in Sources */,
 				D1574969178DB94900B0211A /* IDMPhoto.m in Sources */,

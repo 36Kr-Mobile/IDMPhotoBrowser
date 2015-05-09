@@ -110,13 +110,11 @@
     // Create and setup browser
     IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:photos animatedFromView:sender]; // using initWithPhotos:animatedFromView: method to use the zoom-in animation
     browser.delegate = self;
-    browser.displayActionButton = NO;
-    browser.displayArrowButton = YES;
-    browser.displayCounterLabel = YES;
-    browser.usePopAnimation = YES;
     browser.scaleImage = buttonSender.currentImage;
     if(buttonSender.tag == 102) browser.useWhiteBackgroundColor = YES;
-    
+
+    browser.kr_infoViewType = IDMPhotoBrowserInfoViewTypePageControl;
+
     // Show
     [self presentViewController:browser animated:YES completion:nil];
 }
@@ -258,29 +256,22 @@
 
 - (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser didShowPhotoAtIndex:(NSUInteger)pageIndex
 {
-    id <IDMPhoto> photo = [photoBrowser photoAtIndex:pageIndex];
-    NSLog(@"Did show photoBrowser with photo index: %d, photo caption: %@", pageIndex, photo.caption);
+
 }
 
 - (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser willDismissAtPageIndex:(NSUInteger)pageIndex
 {
-    id <IDMPhoto> photo = [photoBrowser photoAtIndex:pageIndex];
-    NSLog(@"Will dismiss photoBrowser with photo index: %d, photo caption: %@", pageIndex, photo.caption);
+
 }
 
 - (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser didDismissAtPageIndex:(NSUInteger)pageIndex
 {
-    id <IDMPhoto> photo = [photoBrowser photoAtIndex:pageIndex];
-    NSLog(@"Did dismiss photoBrowser with photo index: %d, photo caption: %@", pageIndex, photo.caption);
+
 }
 
 - (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser didDismissActionSheetWithButtonIndex:(NSUInteger)buttonIndex photoIndex:(NSUInteger)photoIndex
 {
-    id <IDMPhoto> photo = [photoBrowser photoAtIndex:photoIndex];
-    NSLog(@"Did dismiss actionSheet with photo index: %d, photo caption: %@", photoIndex, photo.caption);
-    
-    NSString *title = [NSString stringWithFormat:@"Option %d", buttonIndex+1];
-    [UIAlertView showAlertViewWithTitle:title];
+
 }
 
 @end
